@@ -1,0 +1,43 @@
+#!/bin/sh
+
+# 07/03/20 09:04PM
+# When I create PDFs from my iPhone ("Scan document"), their file size is 
+# excessive. This extracts JPGs out of the PDF, reduces their quality, and 
+# turns them back into a PDF.
+#
+# Requires poppler-tools, pdfunite, and ImageMagick
+
+showHelp() {
+    echo Creates a copy of the PDf with all images lower quality.
+    echo
+    echo Usage:
+    echo ./renderPDFQuality pdfFile
+}
+
+while getopts "h" opt; do
+    case "$opt" in
+        h) showHelp; exit;;
+        *) exit;;
+    esac
+done
+
+# Positional argument for filename
+PDF=${@:$OPTIND:1}
+
+DIR="$(dirname ${PDF})"
+PDF_REL="$(basename ${PDF})"
+cd "${DIR}"
+
+# Extracts these images to the current directory
+pdfimages -all "${PDF_REL}" tmpimg___
+for f in tmpimg___*jpg; do
+    echo Converting "$f"...
+    convert -quality 50% $f reduced___-$f.pdf;
+done
+pdfunite reduced___-*.pdf united-${PDF_REL}
+
+# Hope you didn't have any files with this prefix...
+rm reduced___*.pdf tmpimg___*.jpg
+
+mv "${PDF_REL}" orig-"${PDF_REL}"
+mv united-"${PDF_REL}" "${PDF_REL}"
