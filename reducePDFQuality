@@ -30,14 +30,15 @@ cd "${DIR}"
 
 # Extracts these images to the current directory
 pdfimages -all "${PDF_REL}" tmpimg___
-for f in tmpimg___*jpg; do
+for f in tmpimg___*{jpg,png}; do
     echo Converting "$f"...
-    convert -quality 50% $f reduced___-$f.pdf;
+    convert -quality 50% $f reduced___-$f.jpg;
+    convert reduced___-$f.jpg reduced___-$f.pdf;
 done
 pdfunite reduced___-*.pdf united-${PDF_REL}
 
 # Hope you didn't have any files with this prefix...
-rm reduced___*.pdf tmpimg___*.jpg
+rm reduced___*.{pdf,jpg} tmpimg___*.{jpg,png}
 
 mv "${PDF_REL}" orig-"${PDF_REL}"
 mv united-"${PDF_REL}" "${PDF_REL}"
